@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye as builder
+FROM python:3.11-slim-bookworm as builder
 
 # Build dummy packages to skip installing them and their dependencies
 RUN apt-get update \
@@ -12,7 +12,7 @@ RUN apt-get update \
     && equivs-build adwaita-icon-theme \
     && mv adwaita-icon-theme_*.deb /adwaita-icon-theme.deb
 
-FROM python:3.11-slim-bullseye
+FROM python:3.11-slim-bookworm
 
 # Copy dummy packages
 COPY --from=builder /*.deb /
@@ -24,12 +24,14 @@ COPY --from=builder /*.deb /
 # To check the package versions available you can use this command:
 #    apt-cache madison chromium
 WORKDIR /app
+    # Add the `unstable` repo
+RUN echo "deb http://deb.debian.org/debian unstable main contrib non-free" > /etc/apt/sources.list.d/unstable.list \
     # Install dummy packages
-RUN dpkg -i /libgl1-mesa-dri.deb \
+    && dpkg -i /libgl1-mesa-dri.deb \
     && dpkg -i /adwaita-icon-theme.deb \
     # Install dependencies
     && apt-get update \
-    && apt-get install -y --no-install-recommends chromium chromium-common chromium-driver xvfb dumb-init \
+    && apt-get install -y --no-install-recommends -t unstable chromium chromium-common chromium-driver xvfb dumb-init \
         procps curl vim xauth \
     # Remove temporary files and hardware decoding libraries
     && rm -rf /var/lib/apt/lists/* \
