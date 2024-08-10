@@ -45,6 +45,7 @@ RUN echo "deb http://deb.debian.org/debian unstable main contrib non-free" > /et
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt \
+    && pip install -i https://test.pypi.org/simple/ selenium==4.24.0.dev202408100008 \
     # Remove temporary files
     && rm -rf /root/.cache
 
